@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+
+cyanclair='\e[1;36m'
+vertclair='\e[1;32m'
+rougefonce='\e[0;31m'
+violetclair='\e[1;35m'
+rose='\e[1;31m'
+bleufonce='\e[0;34m'
+bleuclair='\e[1;34m'
+grisclair='\e[0;37m'
+jaune='\e[1;33m'
+blanc='\e[1;37m'
+
+testrigor()
+{
+    ./102architect $1 &> saveres
+    if [ "$?" -eq $3 ]
+    then
+        echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[32mPASSED\e[39m"
+        EXIT=0
+    else
+        echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[91mFAIL\e[39m"
+        EXIT=1
+    fi
+}
+
+test()
+{
+    EXIT=0
+    ./102architect $1 &> saveres
+    if [ $4 -eq "1" ] 
+    then
+        diff Mouli_102Architect/result_output/$2 saveres &> /dev/null
+        if [ "$?" -eq $3 ]
+        then
+            echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[32mPASSED\e[39m"
+        else
+            echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[91mFAIL\e[39m"
+            diff Mouli_102Architect/result_output/$2 saveres &> Mouli_102Architect/diff_result/$5
+            EXIT=1
+            echo -e "${jaune}Do you Want to see diff (y/n)${blanc}"
+            read see_diff
+            if [ $see_diff == "y" ]
+            then
+                cat Mouli_102Architect/diff_result/$5
+                echo "" >> Mouli_102Architect/diff_result/$5
+                diff -y Mouli_102Architect/result_output/$2 saveres >> Mouli_102Architect/diff_result/$5
+                echo -e "${jaune}Result save in Mouli_102Architect/diff_result/$5"
+            fi
+        fi
+    fi
+}
+
+echo -e "${rose}Debut des tests de rigeur."
+testrigor "" "1a-no arguments" "84"
+testrigor "1" "1b-not enough arguments" "84"
+testrigor "1 0 -a 5 0" "1c-incorrect arguments 1" "84"
+testrigor "1 0 -t 5 0 -a 5 0" "1d-incorrect arguments 2" "84"
+testrigor "1 0 -t 5 0 -z 5 0 -a 90" "1e-incorrect arguments 3" "84"
+testrigor "1 0 -t 5 0 0" "1f-too many argments -t" "84"
+testrigor "1 0 -t 5" "1g-not enough arguments -t" "84"
+testrigor "1 0 -t a b" "1h-incorrect arguments -t" "84"
+testrigor "1 0 -t a b" "1h-incorrect arguments -t" "84"
+testrigor "1 0 -z 5 0 0" "1i-too many argments -z" "84"
+testrigor "1 0 -z 5" "1j-not enough arguments -z" "84"
+testrigor "1 0 -z a b" "1k-incorrect arguments -z" "84"
+testrigor "1 0 -r 5 0" "1l-too many argments -r" "84"
+testrigor "1 0 -r" "1m-not enough arguments -r" "84"
+testrigor "1 0 -r a" "1n-incorrect arguments -r" "84"
+testrigor "1 0 -s" "1o-not enough arguments -s" "84"
+testrigor "1 0 -s 5 0" "1o-too many argments -s -s" "84"
+testrigor "1 0 -s a" "1q-incorrect arguments -s" "84"
+testrigor "1 0 -t 5 0" "1r-output instructions -t" "0" 
+testrigor "1 0 -z 5 0" "1s-output instructions -z" "0"
+testrigor "1 0 -r 5" "1t-output instructions -r" "0"
+testrigor "1 0 -s 5" "1u-output instructions -s" "0"
+testrigor "1 0 -t 5 0 -z 5 0 -r 5 -s 5" "1v-output instructions full" "0"
+echo -e "${rose}Fin des tests de rigeur."
+echo -e ""
+
+echo -e "${rose}Debut des tests des transformations de matrice."
+test "0 1 -t 5 5" "2a-translation" "0" "1" "diff_test_2a" 
+test "1 0 -t 5 5" "2b-translation" "0" "1" "diff_test_2b"
+test "5 5 -t 5 5" "2c-translation" "0" "1" "diff_test_2c"
+test "0 1 -z 5 5" "2d-scaling" "0" "1" "diff_test_2d"
+test "1 0 -z 5 5" "2e-scaling" "0" "1" "diff_test_2e"
+test "5 5 -z 5 5" "2f-scaling" "0" "1" "diff_test_2f"
+test "0 1 -r 45" "2g-45" "0" "1" "diff_test_2g"
+test "1 0 -r -60" "2h--60" "0" "1" "diff_test_2h"
+test "5 5 -r 620" "2i-620" "0" "1" "diff_test_2i"
+test "0 1 -s 45" "2j-45" "0" "1" "diff_test_2j"
+test "1 0 -s -60" "2k--60" "0" "1" "diff_test_2k"
+test "5 5 -s 620" "2l-620" "0" "1" "diff_test_2l"
+echo -e "${rose}Fin des tests des transformations de matrice."
+echo -e ""
+
+echo -e "${rose}Debut des tests de produit de matrice."
+test "5 5 -t 15 12 -z 32 54" "3a-mat1" "0" "1" "diff_test_3a"
+test "5 5 -z 15 12 -s 32" "3b-mat1" "0" "1" "diff_test_3b"
+test "5 5 -r 15 -s 32" "3c-mat1" "0" "1" "diff_test_3c"
+test "5 5 -t 15 8 -s 32" "3d-mat1" "0" "1" "diff_test_3d"
+test "5 5 -t 15 8 -r 32" "3e-mat1" "0" "1" "diff_test_3e"
+test "5 5 -z 15 8 -r 32" "3f-mat1" "0" "1" "diff_test_3f"
+echo -e "${rose}Fin des tests de produit de matrice."
+echo -e ""
+
+echo -e "${rose}Debut des tests des complexes."
+test "5 5 -t 15 8 -z 32 21 -r 90 -s 35" "4a-complex" "0" "1" "diff_test_4a"
+test "5 5 -s 15 -r 32 -z 90 10 -t 35 10" "4b-complex" "0" "1" "diff_test_4b"
+test "5 5 -z 15  57 -t 32 23 -r 90 -s 35" "4c-complex" "0" "1" "diff_test_4c"
+test "5 5 -t 15  57 -z 32 23 -r 90 -s 35" "4d-complex" "0" "1" "diff_test_4d"
+test "5 5 -r 57 -s 23 -t 10 12 -z 24 35" "4e-complex" "0" "1" "diff_test_4e"
+test "554554 57845216 -r 342685 -s 23324683 -t 101565 1454812 -z 2451244 4965535" "4f-complex" "0" "1" "diff_test_4f"
+echo -e "${rose}Fin des tests des complexes."
+echo -e ""
+
+echo -e "${violetclair}By Yoel Enjoy <3"
+echo -e "${neutre}"
+rm -f saveres
+
+exit $EXIT

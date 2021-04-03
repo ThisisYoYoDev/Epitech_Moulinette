@@ -1,0 +1,5 @@
+Reflection over an axis with an inclination angle of -60 degrees
+-0.50	-0.87	0.00
+-0.87	0.50	0.00
+0.00	0.00	1.00
+(1.00, 0.00) => (-0.50, -0.87)

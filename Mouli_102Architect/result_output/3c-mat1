@@ -1,0 +1,6 @@
+Rotation by a 15 degree angle
+Reflection over an axis with an inclination angle of 32 degrees
+0.66	0.75	0.00
+0.75	-0.66	0.00
+0.00	0.00	1.00
+(5.00, 5.00) => (7.05, 0.49)

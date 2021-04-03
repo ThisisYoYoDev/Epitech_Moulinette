@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+cyanclair='\e[1;36m'
+vertclair='\e[1;32m'
+rougefonce='\e[0;31m'
+violetclair='\e[1;35m'
+rose='\e[1;31m'
+bleufonce='\e[0;34m'
+bleuclair='\e[1;34m'
+grisclair='\e[0;37m'
+jaune='\e[1;33m'
+blanc='\e[1;37m'
+
+testrigor()
+{
+    ./104intersection $1 &> saveres
+    if [ "$?" -eq $3 ]
+    then
+        echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[32mPASSED\e[39m"
+        EXIT=0
+    else
+        echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[91mFAIL\e[39m"
+        EXIT=1
+    fi
+}
+
+test()
+{
+    EXIT=0
+    ./104intersection $1 &> saveres
+    if [ $4 -eq "1" ] 
+    then
+        diff Mouli_104/result_output/$2 saveres &> /dev/null
+        if [ "$?" -eq $3 ]
+        then
+            echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[32mPASSED\e[39m"
+        else
+            echo -e "${violetclair}TEST  :  ${cyanclair}$2\t\e[91mFAIL\e[39m"
+            diff Mouli_104/result_output/$2 saveres &> Mouli_104/diff_result/$5
+            EXIT=1
+            echo -e "${jaune}Do you Want to see diff (y/n)${blanc}"
+            read see_diff
+            if [ $see_diff == "y" ]
+            then
+                cat Mouli_104/diff_result/$5
+                echo "" >> Mouli_104/diff_result/$5
+                diff -y Mouli_104/result_output/$2 saveres >> Mouli_104/diff_result/$5
+                echo -e "${jaune}Result save in Mouli_104/diff_result/$5"
+            fi
+        fi
+    fi
+}
+
+echo -e "${rose}Debut des tests de rigeur."
+testrigor "" "1a-no arguments" "84"
+testrigor "1" "1b-not enough arguments" "84"
+testrigor "1 2 3 4 5 6 7 8 9" "1c-too many arguments" "84"
+testrigor "0 4 0 3 0 0 -2 4" "1d-incorrect arguments 1" "84"
+testrigor "4 4 0 3 0 0 -2 4" "1e-incorrect arguments 2" "84"
+testrigor "3 4 0 3 0 0 -2 181" "1f-incorrect arguments 3" "84"
+testrigor "2 4 0 3 0 0 -2 361" "1g-incorrect arguments 4" "84"
+testrigor "-1 4 0 3 0 0 -2 361" "1h-bad option 1" "84"
+testrigor "-1 4 0 3 0 0 -2 361 3" "1j-bad option 2" "84"
+testrigor "2 4 0 3 0 0 -2 361" "1k-bad radius 1" "84"
+testrigor "3 4 0 3 0 0 -2 361" "1l-bad radius 2" "84"
+testrigor "3 4 0 3 0 0 -2 -10" "1m-bad angle 1" "84"
+testrigor "3 4 0 3 0 0 -2 95" "1n-bad angle 2" "84"
+testrigor "3 4 0 3 0 0 0 10" "1o-null direction vector" "84"
+test "1 0 0 2 1 1 0 1" "1p-output" "0" "1" "diff_test_1p"
+test "1 4 0 3 0 0 -2 4" "1q-output" "0" "1" "diff_test_1q"
+test "3 -1 -1 -1 1 1 5 30" "1r-output" "0" "1" "diff_test_1r"
+echo -e "${rose}Fin des tests de rigeur."
+echo -e ""
+
+echo -e "${rose}Debut des tests des sphere."
+test "1 0 0 2 1 1 0 1" "2a-sphere" "0" "1" "diff_test_2a"
+test "1 9 5 7 8 2 4 1" "2b-sphere" "0" "1" "diff_test_2b"
+test "1 9 5 522 8 2 4 1" "2c-sphere" "0" "1" "diff_test_2c"
+test "1 9 5 7 8 65 4 1" "2d-sphere" "0" "1" "diff_test_2d"
+test "1 9 654 7 8 2 4 1" "2e-sphere" "0" "1" "diff_test_2e"
+test "1 9 5 7 8 2 4 65" "2f-sphere" "0" "1" "diff_test_2f"
+test "1 9 5 7 8 2 56 1" "2g-sphere" "0" "1" "diff_test_2g"
+test "1 56 5 56 8 2 4 1" "2h-sphere" "0" "1" "diff_test_2h"
+echo -e "${rose}Fin des tests des transformations de matrice."
+echo -e ""
+
+echo -e "${rose}Debut des tests des cylinder."
+test "2 0 12 2 1 1 0 1" "3a-cylinder" "0" "1" "diff_test_3a"
+test "2 0 0 2 6546 1 0 1" "3b-cylinder" "0" "1" "diff_test_3b"
+test "2 0 0 2 1 1 0 1" "3c-cylinder" "0" "1" "diff_test_3c"
+test "2 0 654 2 1 1 0 1" "3d-cylinder" "0" "1" "diff_test_3d"
+test "2 0 45 2 1 1 0 1" "3e-cylinder" "0" "1" "diff_test_3e"
+test "2 0 0 2 1 654 0 60" "3f-cylinder" "0" "1" "diff_test_3f"
+test "2 0 0 64 64 65 654 1" "3g-cylinder" "0" "1" "diff_test_3g"
+test "2 1 0 0 0 0 1 1" "3h-cylinder" "0" "1" "diff_test_3h"
+test "2 654 0 2 56 1 56 89" "3i-cylinder" "0" "1" "diff_test_3i"
+test "2 664 0 66 1 65 0 99" "3j-cylinder" "0" "1" "diff_test_3j"
+echo -e "${rose}Fin des tests de produit de matrice."
+echo -e ""
+
+echo -e "${rose}Debut des tests des cones."
+test "3 -1 -1 -1 1 1 5 30" "4a-cone" "0" "1" "diff_test_4a"
+test "3 -1 -1 -1 654 1 5 60" "4b-cone" "0" "1" "diff_test_4b"
+test "3 -1 656 -1 1 1 5 36" "4c-cone" "0" "1" "diff_test_4c"
+test "3 -1 -1 56 1 1 5 40" "4d-cone" "0" "1" "diff_test_4d"
+test "3 -1 -1 -1 64 61 5 88" "4e-cone" "0" "1" "diff_test_4e"
+test "3 -1 566 -1 1 1 5 30" "4f-cone" "0" "1" "diff_test_4f"
+test "3 -657 -1 -1 1 1 5 30" "4g-cone" "0" "1" "diff_test_4g"
+test "3 -1 -1 -33 1 1 5 30" "4h-cone" "0" "1" "diff_test_4h"
+test "3 -1 166 -1 658 1 5 30" "4i-cone" "0" "1" "diff_test_4i"
+test "3 -1 -1 -1 655 1 5 30" "4j-cone" "0" "1" "diff_test_4j"
+echo -e "${rose}Fin des tests des complexes."
+echo -e ""
+
+echo -e "${violetclair}By Yoel Enjoy <3"
+echo -e "${neutre}"
+rm -f saveres
+
+exit $EXIT

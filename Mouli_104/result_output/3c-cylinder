@@ -1,0 +1,5 @@
+Cylinder of radius 1
+Line passing through the point (0, 0, 2) and parallel to the vector (1, 1, 0)
+2 intersection points:
+(0.707, 0.707, 2.000)
+(-0.707, -0.707, 2.000)
